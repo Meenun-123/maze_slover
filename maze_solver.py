@@ -2,7 +2,6 @@ import pygame
 import sys
 from collections import deque
 
-# ── Constants ──────────────────────────────────────────────────────────────────
 WINDOW_TITLE  = "Maze Solver – BFS Visualizer (DAA Mini Project)"
 CELL_SIZE     = 32
 COLS, ROWS    = 20, 20
@@ -11,9 +10,8 @@ WIN_W         = COLS * CELL_SIZE + SIDEBAR_W
 WIN_H         = ROWS * CELL_SIZE
 
 FPS           = 60
-BFS_DELAY     = 18          # ms between each BFS step
+BFS_DELAY     = 18         
 
-# Colours
 C_BG          = (18,  18,  28)
 C_GRID_LINE   = (40,  40,  60)
 C_WALL        = (20,  20,  30)
@@ -27,13 +25,11 @@ C_TEXT        = (200, 200, 230)
 C_ACCENT      = (100, 160, 255)
 C_BORDER      = (60,  60,  100)
 
-# Cell types
+
 OPEN  = 0
 WALL  = 1
 START = 2
 END   = 3
-
-# ── Default maze (0=open, 1=wall, 2=start, 3=end) ─────────────────────────────
 DEFAULT_MAZE = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,2,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
@@ -57,7 +53,6 @@ DEFAULT_MAZE = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 ]
 
-# ── Grid helpers ───────────────────────────────────────────────────────────────
 def create_grid():
     """Deep-copy of the default maze so we can reset cleanly."""
     return [row[:] for row in DEFAULT_MAZE]
@@ -71,7 +66,6 @@ def find_cell(grid, kind):
     return None
 
 
-# ── BFS ────────────────────────────────────────────────────────────────────────
 def bfs_solver(grid):
     """
     Generator – yields one step at a time so the caller can animate.
@@ -113,11 +107,10 @@ def bfs_solver(grid):
         if current != start:
             yield ('visit', current)
 
-    # No path found
+    
     yield ('done', None)
 
 
-# ── Drawing ────────────────────────────────────────────────────────────────────
 def cell_rect(r, c):
     return pygame.Rect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE)
 
@@ -166,7 +159,6 @@ def draw_sidebar(surface, font_big, font_sm, state, path_len):
 
     pygame.draw.line(surface, C_BORDER, (x+16, 78), (x+SIDEBAR_W-16, 78), 1)
 
-    # Legend
     legend = [
         (C_START,   "Start node"),
         (C_END,     "End node"),
@@ -184,7 +176,7 @@ def draw_sidebar(surface, font_big, font_sm, state, path_len):
 
     pygame.draw.line(surface, C_BORDER, (x+16, ly+6), (x+SIDEBAR_W-16, ly+6), 1)
 
-    # Controls
+  
     controls = [
         ("SPACE",  "Start / Pause"),
         ("R",      "Reset maze"),
@@ -202,7 +194,7 @@ def draw_sidebar(surface, font_big, font_sm, state, path_len):
 
     pygame.draw.line(surface, C_BORDER, (x+16, cy+4), (x+SIDEBAR_W-16, cy+4), 1)
 
-    # Status
+ 
     cy += 16
     status_map = {
         'idle':    ("Ready",      C_TEXT),
@@ -220,7 +212,6 @@ def draw_sidebar(surface, font_big, font_sm, state, path_len):
         txt(f"Path length: {path_len} cells", cy, colour=C_PATH, cx=cx)
 
 
-# ── Main ───────────────────────────────────────────────────────────────────────
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIN_W, WIN_H))
@@ -238,7 +229,7 @@ def main():
     visited_cells = set()
     path_cells    = set()
     bfs_gen       = None
-    state         = 'idle'   # idle | running | done | nopath
+    state         = 'idle'  
     path_len      = 0
     last_step_ms  = 0
 
@@ -246,7 +237,7 @@ def main():
     while running:
         now = pygame.time.get_ticks()
 
-        # ── Events ────────────────────────────────────────────────────────────
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -271,8 +262,6 @@ def main():
                         bfs_gen       = bfs_solver(grid)
                         state         = 'running'
                         path_len      = 0
-
-        # ── BFS step ──────────────────────────────────────────────────────────
         if state == 'running' and bfs_gen and (now - last_step_ms) >= BFS_DELAY:
             last_step_ms = now
             try:
@@ -290,7 +279,6 @@ def main():
                 if state != 'done':
                     state = 'nopath'
 
-        # ── Draw ──────────────────────────────────────────────────────────────
         screen.fill(C_BG)
         draw_grid(screen, grid, visited_cells, path_cells)
         draw_sidebar(screen, font_big, font_sm, state, path_len)
